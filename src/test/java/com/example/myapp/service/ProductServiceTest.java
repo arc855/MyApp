@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class ProductServiceTest {
     @InjectMocks
@@ -48,6 +49,45 @@ public class ProductServiceTest {
         assertNotNull(prod);
         assertEquals(product1,prod);
         verify(productRepository,times(1)).save(product1);
+    }
+
+
+    @Test
+    void updateProduct_shouldUpdateExistingProduct() {
+        // Arrange
+        String productId = "123";
+        Product existingProduct = product;
+        Product expectedProduct = product1;
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
+
+        // Act
+        Product result = productService.updateProduct(productId, expectedProduct);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("Hpd", result.getName());
+        assertEquals("well designed", result.getDescription());
+        assertEquals(8.0, result.getPrice());
+
+        verify(productRepository).findById(productId);
+        verify(productRepository).save(existingProduct);
+    }
+
+    @Test
+    public void deleteProductTest(){
+        //Arrange
+        when(productRepository.findById("1")).thenReturn(Optional.of(product1));
+        doNothing().when(productRepository).delete(product1);
+
+        //Act
+        productService.deleteProduct("1");
+
+        //Assert
+        verify(productRepository).findById("1");
+        verify(productRepository).delete(product1);
+
     }
 
 
